@@ -1,0 +1,22 @@
+{
+  "name": "shared-agent-skills",
+  "description": "跨 Agent 的 Skill 共享分发器。装一次，本机所有 agent（WorkBuddy、OpenCode、Claude Code、Codex、Cursor、Gemini、Windsurf、Copilot）共享同一份 skill 真身：单一真身存放在用户级共享根，各 agent 通过目录联接自动读取同一份，改一处全机生效；无法跟随联接的 agent 退化为私有副本且复制前先询问并说明原因；创建或改写 skill 时必须标注专属能力边界与降级方式。",
+  "description_en": "Cross-agent skill sharing dispatcher. Install once and every agent on the machine (WorkBuddy, OpenCode, Claude Code, Codex, Cursor, Gemini, Windsurf, Copilot) reads a single canonical copy of each skill: one source of truth in a user-level shared root, reached through directory links, so editing it updates every agent at once. Agents that cannot follow a link get a private copy, and the copy is only made after the reason is stated and consent is given. New or rewritten skills must declare their capability boundaries and degradation behaviour.",
+  "version": "1.1.0",
+  "license": "MIT",
+  "author": {
+    "name": "王博超",
+    "url": "https://github.com/voltmuse"
+  },
+  "homepage": "https://github.com/voltmuse/shared-agent-skills",
+  "repository": "https://github.com/voltmuse/shared-agent-skills",
+  "keywords": [
+    "skills",
+    "cross-agent",
+    "sharing",
+    "symlink",
+    "junction",
+    "dispatcher"
+  ],
+  "category": "productivity"
+}

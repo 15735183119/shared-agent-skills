@@ -1,0 +1,252 @@
+{
+  "schema_version": "1",
+  "capabilities": [
+    "detect_agents",
+    "share_skill",
+    "share_all",
+    "unshare_skill",
+    "copy_fallback"
+  ],
+  "dependencies": [
+    {
+      "id": "windows-powershell",
+      "type": "runtime",
+      "required": false,
+      "auth_type": "none",
+      "capabilities": [
+        "detect_agents",
+        "share_skill",
+        "share_all",
+        "unshare_skill",
+        "copy_fallback"
+      ],
+      "checks": [
+        {
+          "id": "powershell-present",
+          "type": "cli",
+          "required": false,
+          "command": "powershell",
+          "min_version": "5.1"
+        },
+        {
+          "id": "powershell-probe",
+          "type": "cli_probe",
+          "required": true,
+          "target": "powershell",
+          "expected_status": "ok"
+        }
+      ],
+      "setup": {
+        "official_home_url": "https://learn.microsoft.com/en-us/powershell/scripting/overview",
+        "official_docs_url": "https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell",
+        "steps": [
+          "Windows 10/11 自带 Windows PowerShell 5.1，直接可用，无需安装。",
+          "在任意终端运行 powershell -Command \"$PSVersionTable.PSVersion\" 确认版本不低于 5.1。",
+          "若系统未提供 powershell 命令，安装 PowerShell 7 后其命令名为 pwsh，本 skill 的 .ps1 脚本在两者下均可运行。"
+        ],
+        "verify": "运行 powershell -Command \"$PSVersionTable.PSVersion\"，输出应包含 5.1 或更高版本号。",
+        "security": "只使用系统自带的解释器，不从网络下载任何可执行文件，不修改执行策略（脚本以 -ExecutionPolicy Bypass 单次调用运行）。",
+        "verified_at": "2026-10-24",
+        "applies_to_version": "1.1.0"
+      },
+      "degradation": [
+        {
+          "capability": "detect_agents",
+          "trigger": "系统没有 powershell 命令，或版本低于 5.1",
+          "fallback": "改用 bash 版脚本执行同一组操作（scripts/*.sh）",
+          "user_input": "无需用户输入；若两类运行时都不可用，请告知用户本机缺少可执行脚本的解释器",
+          "limitations": "bash 版无法在 Windows 上创建 junction，需改用目录副本，共享不会自动收敛",
+          "evidence_label": "已验证",
+          "recovery": "安装 PowerShell 7 后重新运行 scripts/detect_agents.ps1",
+          "stop_condition": "两类运行时都不可用时停止，并说明缺少哪种解释器"
+        },
+        {
+          "capability": "share_skill",
+          "trigger": "系统没有 powershell 命令，或版本低于 5.1",
+          "fallback": "改用 bash 版脚本执行同一组操作（scripts/share_skill.sh）",
+          "user_input": "无需用户输入",
+          "limitations": "bash 版在 Windows 的 Git Bash 下不收敛，见 SKILL.md 的平台差异说明",
+          "evidence_label": "已验证",
+          "recovery": "安装 PowerShell 7 后重新运行 scripts/share_skill.ps1",
+          "stop_condition": "两类运行时都不可用时停止，不做任何文件移动"
+        },
+        {
+          "capability": "share_all",
+          "trigger": "系统没有 powershell 命令，或版本低于 5.1",
+          "fallback": "改用 bash 版脚本执行同一组操作（scripts/share_all.sh）",
+          "user_input": "无需用户输入",
+          "limitations": "bash 版在 Windows 的 Git Bash 下不收敛，见 SKILL.md 的平台差异说明",
+          "evidence_label": "已验证",
+          "recovery": "安装 PowerShell 7 后重新运行 scripts/share_all.ps1",
+          "stop_condition": "两类运行时都不可用时停止，不做任何文件移动"
+        },
+        {
+          "capability": "unshare_skill",
+          "trigger": "系统没有 powershell 命令，或版本低于 5.1",
+          "fallback": "改用 bash 版脚本执行同一组操作（scripts/unshare_skill.sh）",
+          "user_input": "无需用户输入",
+          "limitations": "bash 版只能删除符号链接，Windows junction 需用 .ps1 版处理",
+          "evidence_label": "已验证",
+          "recovery": "安装 PowerShell 7 后重新运行 scripts/unshare_skill.ps1",
+          "stop_condition": "两类运行时都不可用时停止，不解除任何联接"
+        },
+        {
+          "capability": "copy_fallback",
+          "trigger": "系统没有 powershell 命令，或版本低于 5.1",
+          "fallback": "改用 bash 版脚本执行复制回退（scripts/share_skill.sh -c <agent-id>）",
+          "user_input": "无需用户输入",
+          "limitations": "bash 版依赖标准输入判断能否询问，无终端时同样跳过复制",
+          "evidence_label": "已验证",
+          "recovery": "安装 PowerShell 7 后重新运行 scripts/share_skill.ps1 -CopyAgents <agent-id>",
+          "stop_condition": "两类运行时都不可用时停止，不产生任何副本"
+        }
+      ]
+    },
+    {
+      "id": "unix-bash",
+      "type": "runtime",
+      "required": false,
+      "auth_type": "none",
+      "capabilities": [
+        "detect_agents",
+        "share_skill",
+        "share_all",
+        "unshare_skill",
+        "copy_fallback"
+      ],
+      "checks": [
+        {
+          "id": "bash-present",
+          "type": "cli",
+          "required": false,
+          "command": "bash",
+          "min_version": "3.2"
+        },
+        {
+          "id": "bash-probe",
+          "type": "cli_probe",
+          "required": true,
+          "target": "bash",
+          "expected_status": "ok"
+        }
+      ],
+      "setup": {
+        "official_home_url": "https://www.gnu.org/software/bash/",
+        "official_docs_url": "https://www.gnu.org/software/bash/manual/",
+        "steps": [
+          "macOS 自带 bash 3.2，本 skill 的脚本已避开 bash 4.0 才有的语法，可直接使用。",
+          "Linux 发行版通常自带 bash，运行 bash --version 确认版本不低于 3.2。",
+          "若 bash 缺失，通过系统包管理器安装，例如 Debian/Ubuntu 使用 apt install bash。"
+        ],
+        "verify": "运行 bash --version，输出应显示 GNU bash 3.2 或更高版本。",
+        "security": "只使用系统自带解释器，不下载远程脚本；脚本不读取任何凭据，不访问网络。",
+        "verified_at": "2026-10-24",
+        "applies_to_version": "1.1.0"
+      },
+      "degradation": [
+        {
+          "capability": "detect_agents",
+          "trigger": "系统没有 bash 命令，或版本低于 3.2",
+          "fallback": "改用 Windows 版脚本执行同一组操作（scripts/*.ps1）",
+          "user_input": "无需用户输入",
+          "limitations": "PowerShell 版依赖 Windows，macOS 与 Linux 上不可用",
+          "evidence_label": "推断",
+          "recovery": "通过系统包管理器安装 bash 后重新运行 scripts/detect_agents.sh",
+          "stop_condition": "两类运行时都不可用时停止，并说明缺少哪种解释器"
+        },
+        {
+          "capability": "share_skill",
+          "trigger": "系统没有 bash 命令，或版本低于 3.2",
+          "fallback": "改用 Windows 版脚本执行同一组操作（scripts/share_skill.ps1）",
+          "user_input": "无需用户输入",
+          "limitations": "PowerShell 版依赖 Windows，macOS 与 Linux 上不可用",
+          "evidence_label": "推断",
+          "recovery": "通过系统包管理器安装 bash 后重新运行 scripts/share_skill.sh",
+          "stop_condition": "两类运行时都不可用时停止，不做任何文件移动"
+        },
+        {
+          "capability": "share_all",
+          "trigger": "系统没有 bash 命令，或版本低于 3.2",
+          "fallback": "改用 Windows 版脚本执行同一组操作（scripts/share_all.ps1）",
+          "user_input": "无需用户输入",
+          "limitations": "PowerShell 版依赖 Windows，macOS 与 Linux 上不可用",
+          "evidence_label": "推断",
+          "recovery": "通过系统包管理器安装 bash 后重新运行 scripts/share_all.sh",
+          "stop_condition": "两类运行时都不可用时停止，不做任何文件移动"
+        },
+        {
+          "capability": "unshare_skill",
+          "trigger": "系统没有 bash 命令，或版本低于 3.2",
+          "fallback": "改用 Windows 版脚本执行同一组操作（scripts/unshare_skill.ps1）",
+          "user_input": "无需用户输入",
+          "limitations": "PowerShell 版依赖 Windows，macOS 与 Linux 上不可用",
+          "evidence_label": "推断",
+          "recovery": "通过系统包管理器安装 bash 后重新运行 scripts/unshare_skill.sh",
+          "stop_condition": "两类运行时都不可用时停止，不解除任何联接"
+        },
+        {
+          "capability": "copy_fallback",
+          "trigger": "系统没有 bash 命令，或版本低于 3.2",
+          "fallback": "改用 Windows 版脚本执行复制回退（scripts/share_skill.ps1 -CopyAgents <agent-id>）",
+          "user_input": "无需用户输入",
+          "limitations": "PowerShell 版依赖 Windows，macOS 与 Linux 上不可用",
+          "evidence_label": "推断",
+          "recovery": "通过系统包管理器安装 bash 后重新运行 scripts/share_skill.sh -c <agent-id>",
+          "stop_condition": "两类运行时都不可用时停止，不产生任何副本"
+        }
+      ]
+    }
+  ],
+  "functional_degradations": [
+    {
+      "capability": "detect_agents",
+      "trigger": "两类脚本运行时都不可用，或脚本文件缺失",
+      "fallback": "由用户手工列出各 agent 的 skills 目录路径，按 SKILL.md 的协议手工建立联接",
+      "user_input": "需要用户提供各 agent 的 skills 目录绝对路径",
+      "limitations": "手工联接不保证指向共享根，可能出现多份副本",
+      "evidence_label": "已验证",
+      "recovery": "安装可用的脚本运行时后重新运行 scripts/detect_agents 对应版本",
+      "stop_condition": "用户无法提供目录路径时停止，不猜测路径"
+    },
+    {
+      "capability": "share_skill",
+      "trigger": "两类脚本运行时都不可用，或目标 skill 不存在",
+      "fallback": "由用户手工把 skill 目录移动到共享根，再手工在各 agent 目录建立联接",
+      "user_input": "需要用户确认共享根路径与各 agent 目录路径",
+      "limitations": "手工操作不经过脚本的备份与保护逻辑，有覆盖风险",
+      "evidence_label": "已验证",
+      "recovery": "安装可用的脚本运行时后重新运行 scripts/share_skill 对应版本",
+      "stop_condition": "共享根路径不可写时停止，不移动任何文件"
+    },
+    {
+      "capability": "share_all",
+      "trigger": "两类脚本运行时都不可用，或存在无权限访问的 agent 目录",
+      "fallback": "逐个 agent 手工执行 share_skill，跳过无权限的目录",
+      "user_input": "需要用户确认要跳过哪些目录",
+      "limitations": "手工执行无法保证幂等，可能重复移动",
+      "evidence_label": "已验证",
+      "recovery": "修复目录权限或安装脚本运行时后重新运行",
+      "stop_condition": "共享根不可写时停止"
+    },
+    {
+      "capability": "unshare_skill",
+      "trigger": "两类脚本运行时都不可用",
+      "fallback": "由用户手工删除各 agent 目录下的联接，共享根内的真身保留不动",
+      "user_input": "需要用户确认要解除哪些目录的联接",
+      "limitations": "手工删除链接有误删真身的风险，需逐个确认",
+      "evidence_label": "已验证",
+      "recovery": "安装可用的脚本运行时后重新运行 scripts/unshare_skill 对应版本",
+      "stop_condition": "用户未确认删除范围时停止"
+    },
+    {
+      "capability": "copy_fallback",
+      "trigger": "无法运行脚本，或用户未在提示后确认复制",
+      "fallback": "不复制：向用户说明该 agent 无法跟随联接，并给出共享根路径，由用户决定是否手工复制",
+      "user_input": "需要用户明确同意后才复制；无人值守运行时直接跳过",
+      "limitations": "副本不随真身更新，需使用者自行同步",
+      "evidence_label": "已验证",
+      "recovery": "环境恢复后重新运行带复制参数的 share_skill",
+      "stop_condition": "未取得确认时跳过复制，不静默产生副本"
+    }
+  ]
+}
